@@ -33,6 +33,16 @@ swift build -c release
 - macOS 13.0+
 - [GlazeWM](https://github.com/glzr-io/glazewm) running with IPC enabled (default)
 
+## Usage with GlazeWM
+
+Add to your `~/.glzr/glazewm/config.yaml` to auto-launch with GlazeWM:
+
+```yaml
+general:
+  startup_commands: ["shell-exec open -a 'GlazeWM Indicator'"]
+  shutdown_commands: ["shell-exec pkill -x GlazeWMIndicator"]
+```
+
 ## How it works
 
 Connects to GlazeWM's WebSocket IPC server at `ws://localhost:6123`, subscribes to workspace events, and renders workspace indicators as native menu bar items. Workspaces without windows are hidden.
