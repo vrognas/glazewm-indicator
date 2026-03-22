@@ -7,7 +7,7 @@
     <key>CFBundleDisplayName</key>
     <string>GlazeWM Indicator</string>
     <key>CFBundleIdentifier</key>
-    <string>io.glzr.glazewm-indicator</string>
+    <string>com.vrognas.glazewm-indicator</string>
     <key>CFBundleVersion</key>
     <string>1</string>
     <key>CFBundleShortVersionString</key>
