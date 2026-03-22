@@ -22,11 +22,62 @@ jobs:
           VERSION: ${{ steps.version.outputs.version }}
         run: ./scripts/bundle.sh release
 
+      - name: Import signing certificate
+        env:
+          CERTIFICATE_P12: ${{ secrets.CERTIFICATE_P12 }}
+          CERTIFICATE_PASSWORD: ${{ secrets.CERTIFICATE_PASSWORD }}
+        run: |
+          KEYCHAIN_PATH="$RUNNER_TEMP/signing.keychain-db"
+          CERT_PATH="$RUNNER_TEMP/certificate.p12"
+
+          echo "$CERTIFICATE_P12" | base64 --decode > "$CERT_PATH"
+
+          security create-keychain -p "" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "" "$KEYCHAIN_PATH"
+
+          security import "$CERT_PATH" -k "$KEYCHAIN_PATH" -P "$CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -s -k "" "$KEYCHAIN_PATH"
+          security list-keychains -d user -s "$KEYCHAIN_PATH" login.keychain-db
+
+      - name: Sign app
+        run: |
+          codesign --sign "Developer ID Application: STEIN VIKTOR ROGNAS (6F9TBQ4LVA)" \
+            --force \
+            --options runtime \
+            --timestamp \
+            ".build/GlazeWM Indicator.app"
+
       - name: Create zip
         env:
           VERSION: ${{ steps.version.outputs.version }}
         run: |
           cd .build
+          zip -r "GlazeWMIndicator-${VERSION}.zip" "GlazeWM Indicator.app"
+
+      - name: Notarize
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          xcrun notarytool submit ".build/GlazeWMIndicator-${VERSION}.zip" \
+            --apple-id "$APPLE_ID" \
+            --password "$APPLE_APP_PASSWORD" \
+            --team-id "$APPLE_TEAM_ID" \
+            --wait
+
+      - name: Staple
+        run: |
+          xcrun stapler staple ".build/GlazeWM Indicator.app"
+
+      - name: Re-zip after stapling
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          cd .build
+          rm "GlazeWMIndicator-${VERSION}.zip"
           zip -r "GlazeWMIndicator-${VERSION}.zip" "GlazeWM Indicator.app"
 
       - name: Create GitHub Release
