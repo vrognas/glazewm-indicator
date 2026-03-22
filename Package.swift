@@ -7,7 +7,8 @@ let package = Package(
     targets: [
         .executableTarget(
             name: "GlazeWMIndicator",
-            path: "GlazeWMIndicator"
+            path: "GlazeWMIndicator",
+            exclude: ["Info.plist"]
         ),
         .testTarget(
             name: "GlazeWMIndicatorTests",
