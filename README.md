@@ -39,7 +39,7 @@ Add to your `~/.glzr/glazewm/config.yaml` to auto-launch with GlazeWM:
 
 ```yaml
 general:
-  startup_commands: ["shell-exec open -a 'GlazeWM Indicator'"]
+  startup_commands: ["shell-exec open -b io.glzr.glazewm-indicator"]
   shutdown_commands: ["shell-exec pkill -x GlazeWMIndicator"]
 ```
 
